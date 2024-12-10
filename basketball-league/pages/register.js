@@ -8,19 +8,24 @@ import {
     VStack,
     useToast,
     useColorModeValue,
+    FormHelperText,
 } from "@chakra-ui/react";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
-const Login = () => {
+const Register = () => {
+    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const toast = useToast();
+    const router = useRouter();
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Validación simple (puedes personalizarla o conectar con un backend)
-        if (!email || !password) {
+        // Validación de campos
+        if (!name || !email || !password || !confirmPassword) {
             toast({
                 title: "Error",
                 description: "Por favor completa todos los campos.",
@@ -31,18 +36,35 @@ const Login = () => {
             return;
         }
 
-        // Lógica para manejar inicio de sesión (puedes conectar con un backend aquí)
+        // Verificar que las contraseñas coincidan
+        if (password !== confirmPassword) {
+            toast({
+                title: "Error",
+                description: "Las contraseñas no coinciden.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+
+        // Lógica para registrar al usuario (puedes conectar con un backend aquí)
         toast({
-            title: "Inicio de sesión exitoso",
-            description: `Bienvenido ${email}`,
+            title: "Registro exitoso",
+            description: `Bienvenido, ${name}! Ahora puedes iniciar sesión.`,
             status: "success",
             duration: 3000,
             isClosable: true,
         });
 
-        // Limpiar campos
+        // Limpiar los campos del formulario
+        setName("");
         setEmail("");
         setPassword("");
+        setConfirmPassword("");
+
+        // Redirigir a la página de login
+        router.push("/login");
     };
 
     return (
@@ -57,10 +79,19 @@ const Login = () => {
             boxShadow="lg"
         >
             <Heading as="h1" mb={6} size="lg" textAlign="center">
-                Iniciar Sesión
+                Crear Cuenta
             </Heading>
             <form onSubmit={handleSubmit}>
                 <VStack spacing={4}>
+                    <FormControl id="name" isRequired>
+                        <FormLabel>Nombre</FormLabel>
+                        <Input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Tu nombre"
+                        />
+                    </FormControl>
                     <FormControl id="email" isRequired>
                         <FormLabel>Correo Electrónico</FormLabel>
                         <Input
@@ -79,8 +110,18 @@ const Login = () => {
                             placeholder="Tu contraseña"
                         />
                     </FormControl>
+                    <FormControl id="confirmPassword" isRequired>
+                        <FormLabel>Confirmar Contraseña</FormLabel>
+                        <Input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            placeholder="Confirma tu contraseña"
+                        />
+                        <FormHelperText>Las contraseñas deben coincidir.</FormHelperText>
+                    </FormControl>
                     <Button type="submit" colorScheme="teal" size="md" width="full">
-                        Iniciar Sesión
+                        Crear Cuenta
                     </Button>
                 </VStack>
             </form>
@@ -88,6 +129,4 @@ const Login = () => {
     );
 };
 
-export default Login;
-
-
+export default Register;
