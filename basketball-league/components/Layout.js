@@ -1,10 +1,11 @@
 import Head from "next/head";
 import Image from "next/image"; // Importación del componente Image
-import { Box, Flex, Text, Stack, Button, useColorModeValue } from "@chakra-ui/react";
+import { Box, Flex, Text, Stack, Button, Switch, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { useRouter } from "next/router"; // Importación de useRouter
 
 const Layout = ({ children }) => {
   const router = useRouter(); // Inicializamos el router para manejar la navegación
+  const { colorMode, toggleColorMode } = useColorMode(); // Hook de Chakra para el cambio de color de tema
 
   return (
     <div>
@@ -32,14 +33,16 @@ const Layout = ({ children }) => {
                 alt="Logo de la Liga de Básquetbol"
                 width={80} // Ajusta tamaño
                 height={80}
+                style={{ borderRadius: "50%" }} // Hace que las puntas sean redondas
               />
             </Text>
           </Flex>
+
           <Stack flex={{ base: 1 }} justify={"flex-end"} direction={"row"} spacing={6}>
             {/* Botón Sign in redirige a /login */}
             <Button
               fontSize={"md"}
-              fontWeight={800}
+              fontWeight={600}
               color={"gray.600"}
               variant={"link"}
               bg={"blue.500"}
@@ -51,7 +54,7 @@ const Layout = ({ children }) => {
             {/* Botón Sign up redirige a /register */}
             <Button
               fontSize={"md"}
-              fontWeight={800}
+              fontWeight={600}
               color={"gray.600"}
               variant={"link"}
               bg={"blue.400"}
@@ -60,6 +63,14 @@ const Layout = ({ children }) => {
             >
               Sign up
             </Button>
+
+            {/* Switch para cambiar entre tema claro y oscuro */}
+            <Switch
+              isChecked={colorMode === "dark"}
+              onChange={toggleColorMode} // Cambia el color del tema
+              colorScheme="teal" // Color del switch
+              size="lg" // Tamaño grande
+            />
           </Stack>
         </Flex>
       </Box>
