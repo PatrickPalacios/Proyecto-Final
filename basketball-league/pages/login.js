@@ -8,18 +8,22 @@ import {
     VStack,
     useToast,
     useColorModeValue,
+    Link,
+    Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const toast = useToast();
+    const router = useRouter();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validación simple (puedes personalizarla o conectar con un backend)
+        // Validación de campos vacíos
         if (!email || !password) {
             toast({
                 title: "Error",
@@ -31,18 +35,49 @@ const Login = () => {
             return;
         }
 
-        // Lógica para manejar inicio de sesión (puedes conectar con un backend aquí)
-        toast({
-            title: "Inicio de sesión exitoso",
-            description: `Bienvenido ${email}`,
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-        });
+        try {
+            // Llamada a la API para validar credenciales
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
 
-        // Limpiar campos
-        setEmail("");
-        setPassword("");
+            const data = await response.json();
+
+            if (!response.ok) {
+                // Mostrar error si las credenciales son inválidas
+                toast({
+                    title: "Error",
+                    description: data.message || "Credenciales inválidas.",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                return;
+            }
+
+            // Si la autenticación es exitosa
+            toast({
+                title: "Inicio de sesión exitoso",
+                description: `Bienvenido ${data.user.name}`,
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
+
+            // Redirigir al usuario a la página de inscripción de equipo
+            router.push("/inscribir-equipo");
+        } catch (error) {
+            console.error("Error al iniciar sesión:", error);
+            toast({
+                title: "Error",
+                description: "Hubo un problema al intentar iniciar sesión.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+        }
     };
 
     return (
@@ -84,10 +119,29 @@ const Login = () => {
                     </Button>
                 </VStack>
             </form>
+
+            {/* Opciones adicionales */}
+            <Box mt={4} textAlign="center">
+                <Link
+                    color="blue.400"
+                    fontSize="sm"
+                    onClick={() => router.push("/reset-password")}
+                >
+                    ¿Olvidaste tu contraseña?
+                </Link>
+            </Box>
+            <Box mt={2} textAlign="center">
+                <Link
+                    color="blue.400"
+                    fontSize="sm"
+                    onClick={() => router.push("/")}
+                >
+                    Regresar a la página principal
+                </Link>
+            </Box>
         </Box>
     );
 };
 
 export default Login;
-
 
