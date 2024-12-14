@@ -1,43 +1,42 @@
-import connectDB from "../../../utils/connectDB"; // Conexión con MongoDB
+import connectDB from "../../../utils/connectDB";
 import User from "../../../models/User";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken"; // Para crear un token de autenticación
 
-connectDB(); // Conectar a la base de datos
+connectDB();
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
     const { email, password } = req.body;
 
-    // Validar que los campos no estén vacíos
     if (!email || !password) {
-      return res.status(400).json({ message: "Correo y contraseña son obligatorios." });
+      return res.status(400).json({ message: "Por favor ingresa tu correo y contraseña." });
     }
 
     try {
-      // Comprobar si el usuario existe
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(400).json({ message: "Correo o contraseña incorrectos." });
+        return res.status(401).json({ message: "Credenciales inválidas." });
       }
 
-      // Verificar la contraseña
       const isMatch = await user.matchPassword(password);
       if (!isMatch) {
-        return res.status(400).json({ message: "Correo o contraseña incorrectos." });
+        return res.status(401).json({ message: "Credenciales inválidas." });
       }
 
-      // Crear un token JWT
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "30d",
-      });
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
 
-      // Enviar respuesta
       res.status(200).json({
         message: "Inicio de sesión exitoso",
         token,
+        user: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        },
       });
     } catch (error) {
+      console.error(error);
       res.status(500).json({ message: "Hubo un error en el servidor." });
     }
   } else {
