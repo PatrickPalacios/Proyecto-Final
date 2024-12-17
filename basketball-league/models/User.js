@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
 
 // Encriptar la contraseña antes de guardar el usuario
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
+  if (!this.isModified("password") || !this.password) {
     return next();
   }
   try {
@@ -46,11 +46,20 @@ userSchema.pre("save", async function (next) {
     this.password = await bcrypt.hash(this.password, salt);
 
     // Capitalizar el primer nombre y apellido
-    this.firstName = this.firstName.charAt(0).toUpperCase() + this.firstName.slice(1).toLowerCase();
-    this.lastName = this.lastName.charAt(0).toUpperCase() + this.lastName.slice(1).toLowerCase();
+    if (this.firstName) {
+      this.firstName =
+        this.firstName.charAt(0).toUpperCase() +
+        this.firstName.slice(1).toLowerCase();
+    }
+    if (this.lastName) {
+      this.lastName =
+        this.lastName.charAt(0).toUpperCase() +
+        this.lastName.slice(1).toLowerCase();
+    }
 
     next();
   } catch (error) {
+    console.error("Error al encriptar la contraseña:", error.message);
     next(error);
   }
 });
